@@ -1,0 +1,155 @@
+Parameters:
+  VpcId:
+    Type: 'AWS::EC2::VPC::Id'
+    Description: VpcId of your existing Virtual Private Cloud (VPC)
+    ConstraintDescription: must be the VPC Id of an existing Virtual Private Cloud.
+  Subnets:
+    Type: 'List<AWS::EC2::Subnet::Id>'
+    Description: The list of SubnetIds in your Virtual Private Cloud (VPC)
+    Default: Public Subnet1, Public Subnet2
+
+Resources:
+  EC2Instance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      ImageId: ami-0a313d6098716f372
+      InstanceType: t2.micro
+      SecurityGroups:
+        - !Ref WebserverSecurityGroup
+      Tags:
+        - Key: Name
+          Value: Ubuntu16 Web Server
+      UserData:
+        'Fn::Base64': >
+          #!/bin/bash
+
+          set -e
+
+          set -x
+
+          # Set timezone
+
+          sudo timedatectl set-timezone America/New_York
+
+
+          sudo apt-get update
+
+          sudo apt-get install -y apache2
+
+          cd /var/www/html
+
+          echo "<h1>Helloworldr</h1><p>This page created entirely by
+          CloudFormation</p>" >index.html
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: e9f6c09d-3005-4e75-b580-2ad22cb42aca
+  WebserverSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: hello-world-webserver
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 80
+          IpProtocol: tcp
+          ToPort: 80
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 64c1b931-0d32-4f4a-8e15-30ed75c3501a
+  ELBV2LBLVOT:
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Properties:
+      SecurityGroups:
+        - !Ref WebserverSecurityGroup
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: daa0e4c5-43fd-48eb-993f-aca15bcfcb27
+  ELBV2TG31ODF:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Properties: {}
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 7795558f-a053-40c4-95e7-f8c692b7e2f4
+    DependsOn:
+      - ELBV2LBLVOT
+  ELBV2L4EQ9S:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      LoadBalancerArn: !Ref ELBV2LBLVOT
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 72dd3c44-6f8c-46eb-bed6-d4886170c1bd
+Outputs:
+  HelloWorldURL:
+    Description: The url pointing to our page.
+    Value: !Sub 'http://${EC2Instance.PublicIp}'
+Metadata:
+  'AWS::CloudFormation::Designer':
+    64c1b931-0d32-4f4a-8e15-30ed75c3501a:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 60
+        'y': 90
+      z: 1
+      embeds: []
+    e9f6c09d-3005-4e75-b580-2ad22cb42aca:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 180
+        'y': 90
+      z: 1
+      embeds: []
+      isassociatedwith:
+        - 64c1b931-0d32-4f4a-8e15-30ed75c3501a
+    daa0e4c5-43fd-48eb-993f-aca15bcfcb27:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: -88.8495279845787
+        'y': 9.901937562418052
+      z: 0
+      isassociatedwith:
+        - 64c1b931-0d32-4f4a-8e15-30ed75c3501a
+    7795558f-a053-40c4-95e7-f8c692b7e2f4:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: -114.88900463565535
+        'y': 124.90962610467331
+      z: 0
+      dependson:
+        - daa0e4c5-43fd-48eb-993f-aca15bcfcb27
+    72dd3c44-6f8c-46eb-bed6-d4886170c1bd:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 115.12637244885515
+        'y': -4.564438354846759
+      z: 0
+      isassociatedwith:
+        - daa0e4c5-43fd-48eb-993f-aca15bcfcb27
+    411891a2-e004-4508-bf1c-31027530ac01:
+      source:
+        id: daa0e4c5-43fd-48eb-993f-aca15bcfcb27
+      target:
+        id: 64c1b931-0d32-4f4a-8e15-30ed75c3501a
+      z: 11
+    70c4c259-7208-4a5a-85c2-684826ab1253:
+      source:
+        id: 7795558f-a053-40c4-95e7-f8c692b7e2f4
+      target:
+        id: daa0e4c5-43fd-48eb-993f-aca15bcfcb27
+      z: 12
+    0226723b-990c-4d5f-806a-2f7cc2080d82:
+      source:
+        id: 72dd3c44-6f8c-46eb-bed6-d4886170c1bd
+      target:
+        id: daa0e4c5-43fd-48eb-993f-aca15bcfcb27
+      z: 13
+
